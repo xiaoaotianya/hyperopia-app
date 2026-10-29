@@ -12,6 +12,11 @@
   --muted: #7a7266;
   --radius: 24px;
   --gutter: 16px;
+  /* 戴镜档位色（日历、选择器共用） */
+  --wear-full: #3f9a7a; --wear-full-bg: #cfe8dc;
+  --wear-most: #8fbf6a; --wear-most-bg: #e2efd3;
+  --wear-less: #e0a34a; --wear-less-bg: #f6e2c0;
+  --wear-none: #c0704e; --wear-none-bg: #f1d3c6;
   --font: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; }

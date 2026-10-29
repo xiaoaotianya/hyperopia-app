@@ -26,6 +26,11 @@ export const router = createRouter({
     { path: '/parent/settings', component: () => import('./views/parent/Settings.vue'), meta: { parent: true } },
     { path: '/parent/calibration', component: () => import('./views/parent/Calibration.vue'), meta: { parent: true } },
     { path: '/parent/disclaimer', component: () => import('./views/parent/Disclaimer.vue'), meta: { parent: true } },
+    { path: '/parent/acuity', component: () => import('./views/parent/Acuity.vue'), meta: { parent: true } },
+    { path: '/parent/acuity/test', component: () => import('./views/parent/AcuityTest.vue'), meta: { parent: true } },
+    { path: '/parent/observe', component: () => import('./views/parent/Observe.vue'), meta: { parent: true } },
+    { path: '/parent/visits', component: () => import('./views/parent/Visits.vue'), meta: { parent: true } },
+    { path: '/parent/report', component: () => import('./views/parent/Report.vue'), meta: { parent: true } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

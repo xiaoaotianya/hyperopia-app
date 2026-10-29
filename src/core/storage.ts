@@ -6,26 +6,63 @@ export interface GameRecord {
   staircase: StaircaseState | null
   history: { date: string; levelEnd: number; trials: number; correct: number }[]
 }
-export interface DayRecord { glassesOn: boolean; secondsTrained: number; gamesPlayed: string[]; plan: string[] }
+export type WearLevel = 'full' | 'most' | 'less' | 'none'
+export interface DayRecord {
+  glassesOn: boolean; secondsTrained: number; gamesPlayed: string[]; plan: string[]
+  wear?: WearLevel
+}
+
+export interface AcuityTrial { logmar: number; symbol: string; answer: string | 'unseen'; correct: boolean }
+export interface EyeResult { logmar: number | null /* null = 劣于 1.0 */; trials: AcuityTrial[] }
+export interface AcuityTest {
+  id: string; date: string; ageMonths: number | null
+  distanceMm: number; pxPerMm: number; bestMeasurableLogmar: number
+  od: EyeResult; os: EyeResult
+  flags: ('below-age' | 'interocular' | 'decline')[]
+}
+
+export type Freq = 'no' | 'sometimes' | 'often'
+export interface Checklist { id: string; date: string; answers: Record<string, Freq>; note: string }
+export interface Observation { id: string; date: string; items: string[]; note: string }
+
+export interface EyeRx { sph: number; cyl: number; axis: number; va: number | null /* 小数视力 */ }
+export interface Visit {
+  id: string; date: string; hospital: string; cycloplegic: boolean
+  od: EyeRx; os: EyeRx
+  eyePosition: 'normal' | 'eso' | 'exo' | 'other'
+  newGlasses: boolean; advice: string; nextDate: string
+}
+
 export interface AppData {
-  version: 1
-  profile: { nickname: string; avatar: string }
+  version: 2
+  profile: { nickname: string; avatar: string; birthMonth: string | null /* YYYY-MM */ }
   settings: { dailyLimitMin: number; viewingDistanceMm: number; recheckDate: string | null; breakEveryMin: number }
   calibration: { pxPerMm: number | null }
   games: Record<string, GameRecord>
   days: Record<string, DayRecord>
   stickers: string[]
+  acuityTests: AcuityTest[]
+  checklists: Checklist[]
+  observations: Observation[]
+  visits: Visit[]
+  /** lastBadgeStreak：上次发戴镜里程碑贴纸时的连续天数 */
+  meta: { lastBackupAt: string | null; persisted: boolean | null; lastBadgeStreak: number }
 }
 
 export function defaultData(): AppData {
   return {
-    version: 1,
-    profile: { nickname: '宝贝', avatar: '🐻' },
+    version: 2,
+    profile: { nickname: '宝贝', avatar: '🐻', birthMonth: null },
     settings: { dailyLimitMin: 12, viewingDistanceMm: 400, recheckDate: null, breakEveryMin: 5 },
     calibration: { pxPerMm: null },
     games: {},
     days: {},
     stickers: [],
+    acuityTests: [],
+    checklists: [],
+    observations: [],
+    visits: [],
+    meta: { lastBackupAt: null, persisted: null, lastBadgeStreak: 0 },
   }
 }
 
@@ -56,18 +93,28 @@ export function createStorage(backend: Backend | null) {
   }
 }
 
+const arr = <T>(v: unknown): T[] => (Array.isArray(v) ? v : [])
+const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {})
+
+/** v0 / v1 / 缺字段的数据补齐为 v2，原有数据保留 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function migrate(raw: any): AppData {
+export function migrate(raw: any): AppData {
   const base = defaultData()
+  raw = obj(raw)
   return {
     ...base,
     ...raw,
-    version: 1,
-    profile: { ...base.profile, ...(raw.profile ?? {}) },
-    settings: { ...base.settings, ...(raw.settings ?? {}) },
-    calibration: { ...base.calibration, ...(raw.calibration ?? {}) },
-    games: raw.games ?? {},
-    days: raw.days ?? {},
-    stickers: raw.stickers ?? [],
+    version: 2,
+    profile: { ...base.profile, ...obj(raw.profile) },
+    settings: { ...base.settings, ...obj(raw.settings) },
+    calibration: { ...base.calibration, ...obj(raw.calibration) },
+    games: obj(raw.games),
+    days: obj(raw.days),
+    stickers: arr(raw.stickers),
+    acuityTests: arr(raw.acuityTests),
+    checklists: arr(raw.checklists),
+    observations: arr(raw.observations),
+    visits: arr(raw.visits),
+    meta: { ...base.meta, ...obj(raw.meta) },
   }
 }
