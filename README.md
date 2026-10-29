@@ -27,6 +27,8 @@ npm run build
 ```
 
 把生成的 `dist/` 目录部署到任意 **HTTPS** 静态托管（如 GitHub Pages、Cloudflare Pages、Netlify 等），用平板打开网址后选择“添加到主屏幕”，之后可全屏、离线使用。
+
+本仓库已配置 GitHub Actions（`.github/workflows/deploy.yml`）：推送到 `main` 后自动测试、构建并发布到 GitHub Pages，地址为 https://xiaoaotianya.github.io/hyperopia-app/ 。首次使用需在仓库 Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
 局域网 http 地址不能注册 Service Worker，所以无法离线或安装，只适合临时试玩。
 
 其他命令：`npm test` 运行单元测试；`npm run preview` 本地预览构建结果。
