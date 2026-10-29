@@ -24,7 +24,10 @@ jobs:
           node-version: 24
           cache: npm
       # 本地开发用的是公司内网 npm 镜像，lock 文件里的地址在 GitHub 上访问不到，统一换成官方源
-      - run: sed -i -E 's#https://depend\.iflytek\.com(:443)?/artifactory/api/npm/npm-repo/#https://registry.npmjs.org/#g' package-lock.json
+      # 内网镜像给部分无作用域包生成的地址缺少 "/-/"（如 yallist/yallist-3.1.1.tgz），一并补上
+      - run: |
+          sed -i -E 's#https://depend\.iflytek\.com(:443)?/artifactory/api/npm/npm-repo/#https://registry.npmjs.org/#g' package-lock.json
+          sed -i -E 's#"https://registry\.npmjs\.org/([a-z0-9._-]+)/(\1-[^/"]+\.tgz)"#"https://registry.npmjs.org/\1/-/\2"#g' package-lock.json
       # npm ci 在 Actions 上报 "Exit handler never called!"（npm 自身 bug）。
       # 失败时打印 npm 调试日志尾部便于排查，再退回到不依赖 lock 文件的 npm install。
       - name: Install dependencies
