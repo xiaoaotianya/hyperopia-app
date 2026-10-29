@@ -25,8 +25,16 @@ jobs:
           cache: npm
       # 本地开发用的是公司内网 npm 镜像，lock 文件里的地址在 GitHub 上访问不到，统一换成官方源
       - run: sed -i -E 's#https://depend\.iflytek\.com(:443)?/artifactory/api/npm/npm-repo/#https://registry.npmjs.org/#g' package-lock.json
-      # npm 偶发 "Exit handler never called!"（npm 自身 bug），失败时重试一次
-      - run: npm ci --no-audit --no-fund || (sleep 10 && npm ci --no-audit --no-fund)
+      # npm ci 在 Actions 上报 "Exit handler never called!"（npm 自身 bug）。
+      # 失败时打印 npm 调试日志尾部便于排查，再退回到不依赖 lock 文件的 npm install。
+      - name: Install dependencies
+        run: |
+          if ! npm ci --no-audit --no-fund; then
+            echo "::warning::npm ci 失败，改用 npm install"
+            tail -n 60 "$(ls -t ~/.npm/_logs/*-debug-0.log | head -n 1)" || true
+            rm -rf node_modules package-lock.json
+            npm install --no-audit --no-fund
+          fi
       - run: npm test
       - run: npm run build
       - uses: actions/configure-pages@v5

@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # 本地 lock 文件指向公司内网镜像，Netlify 上访问不到，改用官方源
+  NPM_CONFIG_REGISTRY = "https://registry.npmjs.org/"
+
+# Service Worker 不能被缓存，否则 PWA 更新不及时
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
