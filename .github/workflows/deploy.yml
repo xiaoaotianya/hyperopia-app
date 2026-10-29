@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # 本地开发用的是公司内网 npm 镜像，lock 文件里的地址在 GitHub 上访问不到，统一换成官方源
+      - run: sed -i -E 's#https://depend\.iflytek\.com(:443)?/artifactory/api/npm/npm-repo/#https://registry.npmjs.org/#g' package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run build
